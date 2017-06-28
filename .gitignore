@@ -1,0 +1,5 @@
+/.idea
+/vendor
+/Gopkg.lock
+/Config.toml
+/drudge.log

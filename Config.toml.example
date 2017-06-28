@@ -1,0 +1,7 @@
+# toml formatted, Tom's Obvious, Minimal Language
+
+LogFile = "drudge.log"
+Database = "<user>:<pass>@tcp(<host>:<port>)/<dbname>"
+
+Host = "localhost"
+Port = 4422

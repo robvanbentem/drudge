@@ -1,0 +1,9 @@
+required = [
+    "github.com/BurntSushi/toml",
+    "github.com/op/go-logging",
+    "github.com/jmoiron/sqlx",
+    "github.com/go-sql-driver/mysql",
+    "github.com/robvanbentem/gocmn",
+	"github.com/gorilla/handlers",
+	"github.com/gorilla/mux",
+]
