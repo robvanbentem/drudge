@@ -54,22 +54,6 @@ func Group(values *[]Value, start uint64, interval uint64) (*[]*ValueGroup, erro
 		groups = append(groups, calculateGroup(&group, n))
 		group = make([]*Value, 0, 32)
 	}
-	/*
-		for idx, value := range *values {
-
-			if value.Timestamp > ts {
-				groups = append(groups, calculateGroup(&group, ts))
-
-				group = make([]*Value, 0, 32)
-				ts += interval
-			}
-
-			if value.Timestamp < ts+interval {
-				group = append(group, &(*values)[idx])
-			}
-		}
-
-		groups = append(groups, calculateGroup(&group, ts))*/
 
 	return &groups, nil
 }
@@ -84,7 +68,6 @@ func calculateGroup(group *[]*Value, timestamp uint64) *ValueGroup {
 	min := math.MaxFloat64
 	max := 0.0
 	total := 0.0
-	last := 0.0
 
 	for _, value := range *group {
 		if value.Value > max {
@@ -96,11 +79,9 @@ func calculateGroup(group *[]*Value, timestamp uint64) *ValueGroup {
 		}
 
 		total = total + value.Value
-		last = value.Value
-
 	}
 
 	avg := total / float64(size)
 
-	return &ValueGroup{timestamp, min, max, avg, last, uint64(size)}
+	return &ValueGroup{timestamp, min, max, avg, (*group)[size-1].Value, uint64(size)}
 }
