@@ -39,7 +39,8 @@ func Group(values *[]Value, start uint64, interval uint64) (*[]*ValueGroup, erro
 	group := make([]*Value, 0, 32)
 
 	idx := 0
-	now := uint64(time.Now().Unix())
+	loc, _ := time.LoadLocation("Europe/Amsterdam")
+	now := uint64(time.Now().In(loc).Unix()) - (2 * 60 * 60)
 
 	for n := ts; n < now; n += interval {
 

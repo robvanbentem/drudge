@@ -20,6 +20,8 @@ func Handle(w http.ResponseWriter, r *http.Request) {
 	date := time.Unix(int64(iStart), 0)
 	format := date.Format("2006-01-02 15:04:05")
 
+	time.LoadLocation("Europe/Amsterdam")
+
 	values, err := data.Fetch(typ, device, iInterval, format)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
