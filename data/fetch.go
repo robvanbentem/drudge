@@ -18,6 +18,7 @@ type ValueGroup struct {
 	Avg       float64
 	Last      float64
 	Count     uint64
+	Gap       bool
 }
 
 const QRY = "SELECT avg(value) as value, unix_timestamp(date) as timestamp FROM data WHERE type = ? AND device = ? AND `date` > ? group by `date` div ? order by timestamp ASC"
@@ -69,14 +70,39 @@ func Group(values *[]Value, start uint64, interval uint64) (*[]*ValueGroup, erro
 		groups = append(groups, calculateGroup(&group, now))
 	}
 
+	linearFill(&groups)
+
 	return &groups, nil
+}
+
+func linearFill(data *[]*ValueGroup) {
+	prev := 0
+
+	for n := 0; n < len(*data); n++ {
+		if (*data)[n].Gap == false {
+			if prev < n-1 && prev > 0 {
+				// we've got a gap ho ho ho. fill 'er up boys!
+				for c := 0; c < n-prev; c++ {
+					diff := float64(n - prev)
+					p := (*data)[prev]
+
+					(*data)[prev+c].Count = 1
+					(*data)[prev+c].Min = p.Min - (p.Min-(*data)[n].Min)/diff*(float64(c)+1)
+					(*data)[prev+c].Max = p.Max - (p.Max-(*data)[n].Max)/diff*(float64(c)+1)
+					(*data)[prev+c].Avg = p.Avg - (p.Avg-(*data)[n].Avg)/diff*(float64(c)+1)
+					(*data)[prev+c].Last = p.Last - (p.Last-(*data)[n].Last)/diff*(float64(c)+1)
+				}
+			}
+			prev = n
+		}
+	}
 }
 
 func calculateGroup(group *[]*Value, timestamp uint64) *ValueGroup {
 	size := len(*group)
 
 	if size == 0 {
-		return &ValueGroup{timestamp, 0, 0, 0, 0, 0}
+		return &ValueGroup{timestamp, 0, 0, 0, 0, 0, true}
 	}
 
 	min := math.MaxFloat64
@@ -97,5 +123,5 @@ func calculateGroup(group *[]*Value, timestamp uint64) *ValueGroup {
 
 	avg := total / float64(size)
 
-	return &ValueGroup{timestamp, min, max, avg, (*group)[size-1].Value, uint64(size)}
+	return &ValueGroup{timestamp, min, max, avg, (*group)[size-1].Value, uint64(size), false}
 }
