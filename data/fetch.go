@@ -20,11 +20,16 @@ type ValueGroup struct {
 	Count     uint64
 }
 
-const QRY = "SELECT value, unix_timestamp(`date`) as timestamp FROM data WHERE type = ? AND device = ? AND `date` > ? order by `date` ASC"
+const QRY = "SELECT avg(value) as value, unix_timestamp(date) as timestamp FROM data WHERE type = ? AND device = ? AND `date` > ? group by `date` div ? order by timestamp ASC"
 
 func Fetch(typ string, device string, interval uint64, start string) (*[]Value, error) {
 	values := make([]Value, 0, 1024)
-	err := gocmn.GetDB().Select(&values, QRY, typ, device, start)
+
+	if interval > 1800 {
+		interval /= 100
+	}
+
+	err := gocmn.GetDB().Select(&values, QRY, typ, device, start, interval)
 	if err != nil {
 		return &values, err
 	}
