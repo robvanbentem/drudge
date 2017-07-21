@@ -61,6 +61,14 @@ func Group(values *[]Value, start uint64, interval uint64) (*[]*ValueGroup, erro
 		group = make([]*Value, 0, 32)
 	}
 
+	if idx < len(*values) {
+		for i := idx; i < len(*values); i++ {
+			group = append(group, &(*values)[i])
+			idx++
+		}
+		groups = append(groups, calculateGroup(&group, now))
+	}
+
 	return &groups, nil
 }
 
